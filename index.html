@@ -6,13 +6,15 @@
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 </head>
 <body>
+	<div id="chatContainer">
+		<div id="chatWindow" >
 
-	<div id="chatWindow" >
-
+		</div>
+		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
+			<input type='text' id="chatBox" value="" />
+			<input type="submit" id="chatSubmit" value="Send"  />
+		</form>
 	</div>
-	<input type='text' id="chatBox" value="" />
-	<input type="button" value="Send" onclick="sendMessage($('#chatBox').val())" />
-
 
 	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
 	<script>
