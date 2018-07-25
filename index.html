@@ -7,11 +7,11 @@
 </head>
 <body>
 	<div id="chatContainer">
-		<div id="chatWindow" >
-
-		</div>
 		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
-			<input type='text' id="chatBox" value="" />
+			<div id="chatWindow" >
+
+			</div>
+			<input type="text"   id="chatBox"    value="" autocomplete="off" />
 			<input type="submit" id="chatSubmit" value="Send"  />
 		</form>
 	</div>
@@ -26,14 +26,13 @@
 
 		socket.on('prompt-un',       function(data){
 			var un = prompt('Please enter a username:')
-			if (un.length > 0)
+			if (!un || un.length > 0)
 			{
 				socket.emit('un', {username: un})
 			}
 		});
 
 		socket.on('chat', function(data){
-			console.log(data);
 			var message = data.msg
 			if (data.showName){
 				if (data.isSelf){
@@ -43,12 +42,17 @@
 				}
 			}
 			var color = '';
+			var messageStyles = '';
 			if (data.color) {
-				color = data.color
+				messageStyles += "color:" + data.color +";"
 			} else {
-				color = '#000000'
+				messageStyles += "color:#000000;"
 			}
-			var html = '<div class="chatMessage" style="color:' + color + '" title="' + data.timestamp + '">' + message + '</div>';
+			if (data.whisper) {
+				messageStyles += "font-style: italic;"
+			}
+
+			var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
 			$("#chatWindow").append(html)
 		});
 
