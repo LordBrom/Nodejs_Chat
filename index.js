@@ -67,6 +67,9 @@ io.sockets.on('connection', function (socket) {
 
 console.log('ready')
 
+
+
+
 var findSocket = function(userName){
     for (var i in io.sockets.connected) {
         var soc = io.sockets.connected[i]
@@ -75,7 +78,6 @@ var findSocket = function(userName){
         }
     }
 }
-
 
 var sendChat = function(socket, msg, user, color, broadcast, options) {
 
@@ -89,7 +91,6 @@ var sendChat = function(socket, msg, user, color, broadcast, options) {
     	socket.emit('chat',           {"msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     }
 }
-
 
 var handleCommand = function(socket, command, params) {
     switch(command.toLowerCase()) {
