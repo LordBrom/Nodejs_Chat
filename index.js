@@ -63,19 +63,19 @@ io.sockets.on('connection', function (socket) {
                         whisperName = params.substring(1, spaceHolder)
                         whisperMessage = params.substring(spaceHolder)
                     }
-                    var userFound = false;
 
-                    for (var i in io.sockets.connected) {
-                        var soc = io.sockets.connected[i]
-                        if (soc.un.toLowerCase() == whisperName.toLowerCase()){
-                            soc.emit('chat',    {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
-                            socket.emit('chat', {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
-                            userFound = true;
-                        }
-                    }
+                    // for (var i in io.sockets.connected) {
+                    //     var soc = io.sockets.connected[i]
+                    //     if (soc.un.toLowerCase() == whisperName.toLowerCase()){
+                    //     }
+                    // }
 
-                    if (!userFound)
-                    {
+                    whisperSocket = findSocket(whisperName);
+
+                    if (whisperSocket){
+                        whisperSocket.emit('chat',    {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
+                        socket.emit('chat', {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
+                    } else {
                         socket.emit('chat',           {"msg": "User not found", "un": "admin", "timestamp": new Date(), "showName": false, "isSelf": false, "color": "#000000"})
                     }
 
@@ -114,3 +114,12 @@ io.sockets.on('connection', function (socket) {
 });
 
 console.log('ready')
+
+var findSocket = function(userName){
+    for (var i in io.sockets.connected) {
+        var soc = io.sockets.connected[i]
+        if (soc.un && soc.un.toLowerCase() == userName.toLowerCase()){
+            return soc
+        }
+    }
+}
