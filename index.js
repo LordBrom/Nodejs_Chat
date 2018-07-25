@@ -38,8 +38,8 @@ io.sockets.on('connection', function (socket) {
             handleCommand(socket, command, params)
 
         } else {
-            sendChat(socket, data.message, socket.un, socket.color, true, true, false)
-            sendChat(socket, data.message, socket.un, socket.color, true, false, true)
+            sendChat(socket, data.message, socket.un, socket.color, false, {showName: true, isSelf: true})
+            sendChat(socket, data.message, socket.un, socket.color, true,  {showName: true, isSelf: false})
         }
     })
 
@@ -52,18 +52,16 @@ io.sockets.on('connection', function (socket) {
         socket.un = data.username
         console.log('User name set to ' + socket.un);
 
-        sendChat(socket, 'You have joined as ' + data.username + '!', socket.un, socket.color, false, true, false)
-        sendChat(socket, data.username + ' has joined!',              socket.un, socket.color, false, true, true)
+        sendChat(socket, 'You have joined as ' + data.username + '!', socket.un, socket.color, false, {showName: false, isSelf: true})
+        sendChat(socket, data.username + ' has joined!',              socket.un, socket.color, true, {showName: false, isSelf: true})
     })
 
     socket.on('disconnect', function(data){
     	if (!socket.un){
-            console.log('A user has connected');
     		return;
-    	} else {
-            console.log(socket.un + ' has disconnected');
-        }
-        sendChat(socket, socket.un + ' has disconnected!', socket.un, socket.color, false, true, true)
+    	}
+        console.log(socket.un + ' has disconnected');
+        sendChat(socket, socket.un + ' has disconnected!', socket.un, socket.color, true, {showName: false, isSelf: true})
     })
 });
 
@@ -79,11 +77,16 @@ var findSocket = function(userName){
 }
 
 
-var sendChat = function(socket, msg, user, color, showName, isSelf, broadcast) {
+var sendChat = function(socket, msg, user, color, broadcast, options) {
+
+    var defaultOptions = {showName: true, isSelf: false, whisper: false}
+
+    options = Object.assign(defaultOptions, options)
+
     if (broadcast){
-        socket.broadcast.emit('chat', {"msg": msg, "un": user, "timestamp": new Date(), "showName": showName, "isSelf": isSelf, "color": color})
+        socket.broadcast.emit('chat', {"msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     } else {
-    	socket.emit('chat',           {"msg": msg, "un": user, "timestamp": new Date(), "showName": showName, "isSelf": isSelf, "color": color})
+    	socket.emit('chat',           {"msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     }
 }
 
@@ -92,7 +95,7 @@ var handleCommand = function(socket, command, params) {
     switch(command.toLowerCase()) {
         case 'help':
             var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />"
-            sendChat(socket, helpMsg, "admin", "#000000", false, true, false)
+            sendChat(socket, helpMsg, "admin", "#000000", false, {showName: false, isSelf: true})
             break;
         case 'list':
             var userList = '';
@@ -105,7 +108,7 @@ var handleCommand = function(socket, command, params) {
                     userCount++;
                 }
             }
-            sendChat(socket, userCount + " Connected user(s) <br />" + userList, "admin", "#000000", false, true, false)
+            sendChat(socket, userCount + " Connected user(s) <br />" + userList, "admin", "#000000", false, {showName: false, isSelf: true})
             break;
         case 'w':
         case 'whisper':
@@ -121,14 +124,14 @@ var handleCommand = function(socket, command, params) {
             whisperSocket = findSocket(whisperName);
 
             if (whisperSocket){
-                whisperSocket.emit('chat',    {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
-                socket.emit('chat', {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
+                sendChat(whisperSocket, whisperMessage, socket.un, socket.color, false, {showName: true, isSelf: false, whisper: true})
+                sendChat(socket,        whisperMessage, socket.un, socket.color, false, {showName: true, isSelf: false, whisper: true})
             } else {
-                socket.emit('chat',           {"msg": "User not found", "un": "admin", "timestamp": new Date(), "showName": false, "isSelf": false, "color": "#000000"})
+                sendChat(socket, "User not found", "admin", "#000000", false, {showName: false, isSelf: false})
             }
 
             break;
         default:
-            sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, true, false)
+            sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, {showName: false, isSelf: true})
     }
 }
