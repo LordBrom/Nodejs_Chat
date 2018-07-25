@@ -1,0 +1,30 @@
+{
+  "name": "nodejs_chat",
+  "version": "1.0.0",
+  "description": "A simple chat for learning node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LordBrom/Nodejs_Chat.git"
+  },
+  "keywords": [
+    "test",
+    "demo",
+    "node",
+    "nodejs",
+    "chat"
+  ],
+  "author": "Nate Mills",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LordBrom/Nodejs_Chat/issues"
+  },
+  "homepage": "https://github.com/LordBrom/Nodejs_Chat#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1"
+  }
+}
