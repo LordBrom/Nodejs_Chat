@@ -67,7 +67,7 @@ io.sockets.on('connection', function (socket) {
 
                     for (var i in io.sockets.connected) {
                         var soc = io.sockets.connected[i]
-                        if (soc.un == whisperName){
+                        if (soc.un.toLowerCase() == whisperName.toLowerCase()){
                             soc.emit('chat',    {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
                             socket.emit('chat', {"msg": whisperMessage, "un": socket.un, "timestamp": new Date(), "showName": true, "isSelf": false, "color": socket.color, whisper: true})
                             userFound = true;
@@ -91,7 +91,8 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('un', function(data){
         if (!data.username){
-            socket.emit('fail', {cause: 'data.message not defined'})
+            socket.emit('fail', {cause: 'data.username not defined'})
+            return;
         }
         socket.color = colorOptions[Math.floor(Math.random() * Math.floor(colorOptions.length))]
         socket.un = data.username
