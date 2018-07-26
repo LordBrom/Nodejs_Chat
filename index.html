@@ -2,15 +2,15 @@
 <html>
 <head>
 	<title></title>
-	 <link rel="stylesheet" href="main.css">
+	 <link rel="stylesheet" href="styles/main.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 </head>
 <body>
 	<div id="chatContainer">
-		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
 			<div id="chatWindow" >
 
 			</div>
+		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
 			<input type="text"   id="chatBox"    value="" autocomplete="off" />
 			<input type="submit" id="chatSubmit" value="Send"  />
 		</form>
@@ -20,6 +20,7 @@
 	<script>
 		var socket = io('http://localhost:8080');
 		socket.on('connect',    function(    ){console.log('connect'    )});
+
 		socket.on('disconnect', function(    ){console.log('disconnect' )});
 
 		socket.on('fail',       function(data){console.log( data)});
@@ -30,6 +31,9 @@
 			{
 				socket.emit('un', {username: un})
 			}
+		});
+		socket.on('alert',       function(msg){
+			alert(msg);
 		});
 
 		socket.on('chat', function(data){
