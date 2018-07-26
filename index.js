@@ -3,6 +3,10 @@ var server = require('http').Server(app);
 // Loading socket.io
 var io = require('socket.io')(server);
 
+// var User = require('./scripts/User.js');
+var User = require('./User.js');
+var Users = {};
+
 // app.get('/', function(req, res){
 //   res.sendFile(__dirname + '../index.html');
 // });
@@ -20,7 +24,8 @@ io.sockets.on('connection', function (socket) {
     		socket.emit('fail', {cause: 'data.message not defined'})
     		return;
     	}
-    	if (!socket.un)
+        var socUser = getUser(socket.id)
+    	if (!socUser)
     	{
     		socket.emit('prompt-un')
     		return;
@@ -41,8 +46,8 @@ io.sockets.on('connection', function (socket) {
             handleCommand(socket, command, params)
 
         } else {
-            sendChat(socket, data.message, socket.un, socket.color, false, {showName: true, isSelf: true})
-            sendChat(socket, data.message, socket.un, socket.color, true,  {showName: true, isSelf: false})
+            sendChat(socket, data.message, socUser.un, socUser.color, false, {showName: true, isSelf: true})
+            sendChat(socket, data.message, socUser.un, socUser.color, true,  {showName: true, isSelf: false})
         }
     })
 
@@ -59,20 +64,32 @@ io.sockets.on('connection', function (socket) {
             return;
         }
 
-        socket.color = colorOptions[Math.floor(Math.random() * Math.floor(colorOptions.length))]
-        socket.un = data.username
-        console.log('User name set to ' + socket.un);
+        var userColor = colorOptions[Math.floor(Math.random() * Math.floor(colorOptions.length))]
 
-        sendChat(socket, 'You have joined as ' + data.username + '!', "admin", socket.color, false, {showName: false, isSelf: true})
-        sendChat(socket, data.username + ' has joined!',              "admin", socket.color, true, {showName: false, isSelf: true})
+        var newUser = new User(socket.id, data.username, userColor);
+
+        Users[newUser.id] = newUser;
+
+        console.log(Users[socket.id].userName);
+
+        console.log('User name set to ' + newUser.un);
+
+        sendChat(socket, 'You have joined as ' + data.username + '!', "admin", newUser.color, false, {showName: false, isSelf: true})
+        sendChat(socket, data.username + ' has joined!',              "admin", newUser.color, true, {showName: false, isSelf: true})
     })
 
     socket.on('disconnect', function(data){
-    	if (!socket.un){
-    		return;
-    	}
-        console.log(socket.un + ' has disconnected');
-        sendChat(socket, socket.un + ' has disconnected!', "admin", socket.color, true, {showName: false, isSelf: true})
+        var socUser = getUser(socket.id)
+
+        if (!socUser){
+            console.log('user not found')
+            return;
+        }
+
+        Users[socket.id].connected = false;
+
+        console.log(socUser.un + ' has disconnected');
+        sendChat(socket, socUser.un + ' has disconnected!', "admin", socUser.color, true, {showName: false, isSelf: true})
     })
 });
 
@@ -150,4 +167,11 @@ var handleCommand = function(socket, command, params) {
         default:
             sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, {showName: false, isSelf: true})
     }
+}
+
+var getUser = function(socketID) {
+    return Users[socketID];
+}
+var getSocket = function(socketID) {
+    return io.sockets.connected[socketID];
 }
