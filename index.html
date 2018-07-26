@@ -10,7 +10,7 @@
 	<div id="chatContainer">
 		<div id="chatWindow" >
 			<ul v-for="message in messages" :key="message">
-				<li class="chatMessage">{{ message }}</li>
+				<li class="chatMessage" v-bind:title="message.timestamp" v-bind:style="message.style" >{{ message.msg }}</li>
 			</ul>
 		</div>
 		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
@@ -61,7 +61,9 @@
 				messageStyles += "font-style: italic;"
 			}
 
-			chatMessages.messages.push(message)
+			var newChatMsg = {msg: message, style: messageStyles, timestamp : data.timestamp}
+
+			chatMessages.messages.push(newChatMsg)
 
 			// var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
 			// $("#chatWindow").append(html)
