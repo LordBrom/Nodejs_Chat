@@ -111,7 +111,7 @@ var sendChat = function(socket, msg, user, color, broadcast, options) {
 
     options = Object.assign(defaultOptions, options)
 
-    console.log(user + ":" + msg)
+    console.log(user + ": " + msg)
 
     if (broadcast){
         socket.broadcast.emit('chat', {"id": uuidv1(), "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
