@@ -24,11 +24,10 @@
 	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
 	<script>
 		var socket = io('http://localhost:8080');
-		socket.on('connect',    function(    ){console.log('connect'    )});
-
-		socket.on('disconnect', function(    ){console.log('disconnect' )});
-
-		socket.on('fail',       function(data){console.log( data)});
+		socket.on('connect',    function(    ){ console.log('connect')    });
+		socket.on('disconnect', function(    ){ console.log('disconnect') });
+		socket.on('fail',       function(data){ console.log( data)        });
+		socket.on('alert',      function(msg ){ alert(msg)                });
 
 		socket.on('prompt-un',       function(data){
 			var un = prompt('Please enter a username:')
@@ -36,9 +35,6 @@
 			{
 				socket.emit('un', {username: un})
 			}
-		});
-		socket.on('alert',       function(msg){
-			alert(msg);
 		});
 
 		socket.on('chat', function(data){
@@ -64,9 +60,6 @@
 			var newChatMsg = {msg: message, style: messageStyles, timestamp : data.timestamp}
 
 			chatMessages.messages.push(newChatMsg)
-
-			// var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
-			// $("#chatWindow").append(html)
 		});
 
 		var sendMessage = function(msg)
