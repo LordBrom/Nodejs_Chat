@@ -9,7 +9,7 @@
 <body>
 	<div id="chatContainer">
 		<div id="chatWindow" >
-			<ul v-for="message in messages" :key="message">
+			<ul v-for="message in messages">
 				<li class="chatMessage" v-bind:title="message.timestamp" v-bind:style="message.style" >{{ message.msg }}</li>
 			</ul>
 		</div>
@@ -57,7 +57,7 @@
 				messageStyles += "font-style: italic;"
 			}
 
-			var newChatMsg = {msg: message, style: messageStyles, timestamp : data.timestamp}
+			var newChatMsg = {id: data.id, msg: message, style: messageStyles, timestamp : data.timestamp, user: data.un}
 
 			chatMessages.messages.push(newChatMsg)
 		});
