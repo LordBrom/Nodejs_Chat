@@ -4,18 +4,23 @@
 	<title></title>
 	 <link rel="stylesheet" href="styles/main.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
 	<div id="chatContainer">
-			<div id="chatWindow" >
-
-			</div>
+		<div id="chatWindow" >
+			<ul v-for="message in messages" :key="message">
+				<li class="chatMessage">{{ message }}</li>
+			</ul>
+		</div>
 		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
 			<input type="text"   id="chatBox"    value="" autocomplete="off" />
 			<input type="submit" id="chatSubmit" value="Send"  />
 		</form>
 	</div>
 
+
+    <script src="scripts/Vue.js"></script>
 	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
 	<script>
 		var socket = io('http://localhost:8080');
@@ -56,8 +61,10 @@
 				messageStyles += "font-style: italic;"
 			}
 
-			var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
-			$("#chatWindow").append(html)
+			chatMessages.messages.push(message)
+
+			// var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
+			// $("#chatWindow").append(html)
 		});
 
 		var sendMessage = function(msg)

@@ -25,6 +25,7 @@
   "homepage": "https://github.com/LordBrom/Nodejs_Chat#readme",
   "dependencies": {
     "express": "^4.16.3",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "vue": "^2.5.16"
   }
 }
