@@ -1,11 +1,18 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var server = require('http').Server(app);
 // Loading socket.io
 var io = require('socket.io')(server);
 
-// app.get('/', function(req, res){
-//   res.sendFile(__dirname + '../index.html');
-// });
+var path    = require('path');
+const uuidv1 = require('uuid/v1');
+
+app.use("/styles",  express.static(path.join(__dirname, 'styles')));
+app.use("/scripts",  express.static(path.join(__dirname, 'scripts')));
+
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
 
 server.listen(8080);
 
@@ -102,18 +109,19 @@ var listUserNames = function() {
     return userCount + " Connected user(s) <br />" + userList
 }
 
+
 var sendChat = function(socket, msg, user, color, broadcast, options) {
 
     var defaultOptions = {showName: true, isSelf: false, whisper: false}
 
     options = Object.assign(defaultOptions, options)
 
-    console.log(user + ":" + msg)
+    console.log(user + ": " + msg)
 
     if (broadcast){
-        socket.broadcast.emit('chat', {"msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
+        socket.broadcast.emit('chat', {"id": uuidv1(), "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     } else {
-        socket.emit('chat',           {"msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
+        socket.emit('chat',           {"id": uuidv1(), "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     }
 }
 

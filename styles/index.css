@@ -3,11 +3,17 @@
 }
 
 #chatWindow {
-	border: 1px solid black;
-	height: 500px;
-	width: 100%;
+    border: 1px solid black;
+    height: 500px;
+    width: 100%;
 
-	overflow-y: scroll;
+    overflow-y: scroll;
+}
+
+#chatWindow ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 .chatMessage {

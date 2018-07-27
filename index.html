@@ -2,28 +2,31 @@
 <html>
 <head>
 	<title></title>
-	 <link rel="stylesheet" href="styles/main.css">
+	<link rel="stylesheet" href="styles/index.css">
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
 	<div id="chatContainer">
-			<div id="chatWindow" >
-
-			</div>
+		<div id="chatWindow" >
+			<ul v-for="message in messages">
+				<li class="chatMessage" v-bind:title="message.timestamp" v-bind:style="message.style" >{{ message.msg }}</li>
+			</ul>
+		</div>
 		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
 			<input type="text"   id="chatBox"    value="" autocomplete="off" />
 			<input type="submit" id="chatSubmit" value="Send"  />
 		</form>
 	</div>
 
-	<script src="http://localhost:8080/socket.io/socket.io.js"></script>
+    <script src="scripts/Vue.js"></script>
+	<script src="socket.io/socket.io.js"></script>
 	<script>
 		var socket = io('http://localhost:8080');
-		socket.on('connect',    function(    ){console.log('connect'    )});
-
-		socket.on('disconnect', function(    ){console.log('disconnect' )});
-
-		socket.on('fail',       function(data){console.log( data)});
+		socket.on('connect',    function(    ){ console.log('connect')    });
+		socket.on('disconnect', function(    ){ console.log('disconnect') });
+		socket.on('fail',       function(data){ console.log( data)        });
+		socket.on('alert',      function(msg ){ alert(msg)                });
 
 		socket.on('prompt-un',       function(data){
 			var un = prompt('Please enter a username:')
@@ -31,9 +34,6 @@
 			{
 				socket.emit('un', {username: un})
 			}
-		});
-		socket.on('alert',       function(msg){
-			alert(msg);
 		});
 
 		socket.on('chat', function(data){
@@ -56,8 +56,9 @@
 				messageStyles += "font-style: italic;"
 			}
 
-			var html = '<div class="chatMessage" style="' + messageStyles + '" title="' + data.timestamp + '">' + message + '</div>';
-			$("#chatWindow").append(html)
+			var newChatMsg = {id: data.id, msg: message, style: messageStyles, timestamp : data.timestamp, user: data.un}
+
+			chatMessages.messages.push(newChatMsg)
 		});
 
 		var sendMessage = function(msg)
