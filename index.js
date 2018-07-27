@@ -45,7 +45,7 @@ io.sockets.on('connection', function (socket) {
                     params = data.message.substring(firstSpace)
                 }
 
-                handleCommand(socket, command, params)
+                handleCommand(socket, command, params.trimLeft())
 
             } else {
                 sendChat(socket, data.message, socket.un, socket.color, false, {showName: true, isSelf: true})
@@ -123,9 +123,9 @@ var sendChat = function(socket, msg, user, color, broadcast, options) {
     console.log(user + ": " + msg)
 
     if (broadcast){
-        socket.broadcast.emit('chat', {"id": uuidv1(), "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
+        socket.broadcast.emit('chat', {"id": uuidv1(), "socketID":socket.id, "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     } else {
-        socket.emit('chat',           {"id": uuidv1(), "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
+        socket.emit('chat',           {"id": uuidv1(), "socketID":socket.id, "msg": msg, "un": user, "timestamp": new Date(), "showName": options.showName, "isSelf": options.isSelf, "color": color, "whisper": options.whisper})
     }
 }
 
@@ -139,21 +139,20 @@ var handleCommand = function(socket, command, params) {
 
             break;
         case 'help':
-            var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />"
+            var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />color &lt;6 digit hexadecimal value &gt; - Sets your chat color to entered hex value.<br />"
             sendChat(socket, helpMsg, "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
             break;
         case 'color':
-            if (params.substring(1,2) == '#') {
-                params = params.substring(2);
-            } else {
+            if (params.substring(0,1) == '#') {
                 params = params.substring(1);
             }
             if (checkForHex(params))
             {
                 sendChat(socket, "Your chat color has been set to <span style='color:#" + params + "'>#" + params + "</span>.", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
                 socket.color = "#"+params;
+                // socket.emit('setColor', {socketID:socket.id, color:"#"+params} )
             } else {
-                sendChat(socket, "Valid usage of color command</br>/color <3 or 6 hexadecimal value>", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
+                sendChat(socket, "Valid usage of color command</br>/color <6 digit hexadecimal value>", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
             }
             break;
         case 'list':
@@ -161,12 +160,12 @@ var handleCommand = function(socket, command, params) {
             break;
         case 'w':
         case 'whisper':
-            var spaceHolder = params.indexOf(" ", 1)
+            var spaceHolder = params.indexOf(" ")
 
             if (spaceHolder == -1) {
                 break; // no message
             } else {
-                whisperName = params.substring(1, spaceHolder)
+                whisperName = params.substring(0, spaceHolder)
                 whisperMessage = params.substring(spaceHolder)
             }
 

@@ -53,10 +53,25 @@
 				messageStyles += "font-style: italic;"
 			}
 
-			var newChatMsg = {id: data.id, msg: message, style: messageStyles, timestamp : data.timestamp, user: data.un}
+			var newChatMsg = {id: data.id, socketID: data.socketID, msg: message, style: messageStyles, timestamp : data.timestamp, user: data.un}
 
 			chatWindow.messages.push(newChatMsg)
 		});
+
+		socket.on("setColor", function(data) {
+			if (!data.socketID || !data.color){
+				return;
+			}
+			var msg = '';
+			// console.log("socketID", data.socketID)
+			for (i in chatWindow.messages) {
+				// console.log('"'+msg.socketID+'"', '"'+data.socketID+'"', msg.socketID == data.socketID)
+				msg = chatWindow.messages[i]
+				if (msg.socketID == data.socketID){
+					chatWindow.messages[i].color = "color:" + data.color + ";";
+				}
+			}
+		})
 
 		chatWindow.sendMessage = function(msg)
 		{
