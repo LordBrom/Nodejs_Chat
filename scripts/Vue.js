@@ -1,6 +1,6 @@
 Vue.component('message-normal', {
   template:
-  '<li class="chatMessage" v-bind:title="commentpost.timestamp" v-bind:style="commentpost.style"  > {{ commentpost.msg }} </li>',
+  '<li class="chatMessage" v-html="commentpost.msg" v-bind:title="commentpost.timestamp" v-bind:style="commentpost.style"  > {{ commentpost.msg }} </li>',
   props: ['commentpost']
 });
 
@@ -10,8 +10,7 @@ var chatWindow = new Vue({
 	data: {
 		username: '',
 		messages: [],
-		messageBox : '',
-		sendMessage : ''
+		messageBox : ''
 	},
 	methods: {
 		addMessage: function () {

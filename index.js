@@ -33,7 +33,6 @@ io.sockets.on('connection', function (socket) {
                 socket.emit('prompt-un')
                 return;
             }
-            console.log(data.message)
             if (data.message.substring(0, 1) == '/')
             {
                 var command = ''
@@ -75,8 +74,8 @@ io.sockets.on('connection', function (socket) {
         socket.un = data.username
         console.log('User name set to ' + socket.un);
 
-        sendChat(socket, 'You have joined as ' + data.username + '!', "admin", socket.color, false, {showName: false, isSelf: true})
-        sendChat(socket, data.username + ' has joined!',              "admin", socket.color, true, {showName: false, isSelf: true})
+        sendChat(socket, 'You have joined as ' + data.username + '!', "admin", socket.color, false, {showName: false, isSelf: true, whisper: true})
+        sendChat(socket, data.username + ' has joined!',              "admin", socket.color, true, {showName: false, isSelf: true, whisper: true})
     })
 
     socket.on('disconnect', function(data){
@@ -84,7 +83,7 @@ io.sockets.on('connection', function (socket) {
             return;
         }
         console.log(socket.un + ' has disconnected');
-        sendChat(socket, socket.un + ' has disconnected!', "admin", socket.color, true, {showName: false, isSelf: true})
+        sendChat(socket, socket.un + ' has disconnected!', "admin", socket.color, true, {showName: false, isSelf: true, whisper: true})
     })
 });
 
@@ -134,13 +133,31 @@ var handleCommand = function(socket, command, params) {
     switch(command.toLowerCase()) {
         case 'test':
 
+            app.get('/', function(req, res){
+              res.sendFile(__dirname + '/testPage.html');
+            });
+
             break;
         case 'help':
             var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />"
-            sendChat(socket, helpMsg, "admin", "#000000", false, {showName: false, isSelf: true})
+            sendChat(socket, helpMsg, "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
+            break;
+        case 'color':
+            if (params.substring(1,2) == '#') {
+                params = params.substring(2);
+            } else {
+                params = params.substring(1);
+            }
+            if (checkForHex(params))
+            {
+                sendChat(socket, "Your chat color has been set to <span style='color:#" + params + "'>#" + params + "</span>.", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
+                socket.color = "#"+params;
+            } else {
+                sendChat(socket, "Valid usage of color command</br>/color <3 or 6 hexadecimal value>", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
+            }
             break;
         case 'list':
-            sendChat(socket, listUserNames(), "admin", "#000000", false, {showName: false, isSelf: true})
+            sendChat(socket, listUserNames(), "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
             break;
         case 'w':
         case 'whisper':
@@ -159,11 +176,24 @@ var handleCommand = function(socket, command, params) {
                 sendChat(whisperSocket, whisperMessage, socket.un, socket.color, false, {showName: true, isSelf: false, whisper: true})
                 sendChat(socket,        whisperMessage, socket.un, socket.color, false, {showName: true, isSelf: false, whisper: true})
             } else {
-                sendChat(socket, "User not found", "admin", "#000000", false, {showName: false, isSelf: false})
+                sendChat(socket, "User not found", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
             }
 
             break;
         default:
-            sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, {showName: false, isSelf: true})
+            sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
+    }
+}
+
+var checkForHex = function(str){
+    var re = /[0-9A-Fa-f]{6}/g;
+
+    console.log("checkForHex", str)
+
+    if (re.test(str) && (str.length == 6|| str.length == 3))
+    {
+        return true;
+    } else {
+        return false;
     }
 }

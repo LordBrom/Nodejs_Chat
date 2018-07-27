@@ -9,11 +9,11 @@
 	<div id="chatContainer">
 		<div id="chatWindow" >
 			<ul>
-				<li class="chatMessage" is="message-normal" v-for="message in messages" v-bind:commentpost="message"></li>
+				<li class="chatMessage" is="message-normal" v-for="message in messages"  v-bind:commentpost="message"></li>
 			</ul>
 		</div>
-			<input type="text"   id="chatBox" autocomplete="off" placeholder="Send a message"  v-model="messageBox" v-on:keyup.enter="addMessage" />
-			<input type="button" id="chatSubmit" v-on:click="addMessage" value="Send"  />
+		<input type="text"   id="chatBox" autocomplete="off" placeholder="Send a message"  v-model="messageBox" v-on:keyup.enter="addMessage" />
+		<input type="button" id="chatSubmit" v-on:click="addMessage" value="Send"  />
 	</div>
 
     <script src="scripts/Vue.js"></script>
