@@ -3,29 +3,26 @@
 <head>
 	<title></title>
 	<link rel="stylesheet" href="styles/index.css">
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
 	<div id="chatContainer">
 		<div id="chatWindow" >
-			<ul v-for="message in messages">
-				<li class="chatMessage" v-bind:title="message.timestamp" v-bind:style="message.style" >{{ message.msg }}</li>
+			<ul>
+				<li class="chatMessage" is="message-normal" v-for="message in messages" v-bind:commentpost="message"></li>
 			</ul>
 		</div>
-		<form onsubmit="sendMessage($('#chatBox').val()); return false;" >
-			<input type="text"   id="chatBox"    value="" autocomplete="off" />
-			<input type="submit" id="chatSubmit" value="Send"  />
-		</form>
+			<input type="text"   id="chatBox" autocomplete="off" placeholder="Send a message"  v-model="messageBox" v-on:keyup.enter="addMessage" />
+			<input type="button" id="chatSubmit" v-on:click="addMessage" value="Send"  />
 	</div>
 
     <script src="scripts/Vue.js"></script>
-	<script src="socket.io/socket.io.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		var socket = io('http://localhost:8080');
+		var socket = io('/');
 		socket.on('connect',    function(    ){ console.log('connect')    });
 		socket.on('disconnect', function(    ){ console.log('disconnect') });
-		socket.on('fail',       function(data){ console.log( data)        });
+		socket.on('fail',       function(data){ console.error(data)        });
 		socket.on('alert',      function(msg ){ alert(msg)                });
 
 		socket.on('prompt-un',       function(data){
@@ -58,16 +55,15 @@
 
 			var newChatMsg = {id: data.id, msg: message, style: messageStyles, timestamp : data.timestamp, user: data.un}
 
-			chatMessages.messages.push(newChatMsg)
+			chatWindow.messages.push(newChatMsg)
 		});
 
-		var sendMessage = function(msg)
+		chatWindow.sendMessage = function(msg)
 		{
 			if (!socket) {
 				console.warn("no socket");
 				return;
 			}
-			$("#chatBox").val('')
 			socket.emit('message', {message: msg})
 		}
 	</script>

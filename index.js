@@ -23,33 +23,38 @@ io.sockets.on('connection', function (socket) {
     socket.emit('prompt-un')
 
     socket.on('message', function(data){
-        if (!data.message){
-            socket.emit('fail', {cause: 'data.message not defined'})
-            return;
-        }
-        if (!socket.un)
-        {
-            socket.emit('prompt-un')
-            return;
-        }
-
-        if (data.message.substring(0, 1) == '/')
-        {
-            var command = ''
-            var params = ''
-            var firstSpace = (data.message).indexOf(" ")
-            if (firstSpace == -1) {
-                command = data.message.substring(1)
-            } else {
-                command = data.message.substring(1, firstSpace)
-                params = data.message.substring(firstSpace)
+        try {
+            if (!data.message){
+                socket.emit('fail', {cause: 'data.message not defined'})
+                return;
             }
+            if (!socket.un)
+            {
+                socket.emit('prompt-un')
+                return;
+            }
+            console.log(data.message)
+            if (data.message.substring(0, 1) == '/')
+            {
+                var command = ''
+                var params = ''
+                var firstSpace = (data.message).indexOf(" ")
+                if (firstSpace == -1) {
+                    command = data.message.substring(1)
+                } else {
+                    command = data.message.substring(1, firstSpace)
+                    params = data.message.substring(firstSpace)
+                }
 
-            handleCommand(socket, command, params)
+                handleCommand(socket, command, params)
 
-        } else {
-            sendChat(socket, data.message, socket.un, socket.color, false, {showName: true, isSelf: true})
-            sendChat(socket, data.message, socket.un, socket.color, true,  {showName: true, isSelf: false})
+            } else {
+                sendChat(socket, data.message, socket.un, socket.color, false, {showName: true, isSelf: true})
+                sendChat(socket, data.message, socket.un, socket.color, true,  {showName: true, isSelf: false})
+            }
+        }
+        catch(error) {
+            socket.emit('fail', {error})
         }
     })
 
@@ -127,6 +132,9 @@ var sendChat = function(socket, msg, user, color, broadcast, options) {
 
 var handleCommand = function(socket, command, params) {
     switch(command.toLowerCase()) {
+        case 'test':
+
+            break;
         case 'help':
             var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />"
             sendChat(socket, helpMsg, "admin", "#000000", false, {showName: false, isSelf: true})
