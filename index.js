@@ -7,6 +7,8 @@ var io = require('socket.io')(server);
 var path    = require('path');
 const uuidv1 = require('uuid/v1');
 
+var ChromecastAPI = require('chromecast-api')
+
 app.use("/styles",  express.static(path.join(__dirname, 'styles')));
 app.use("/scripts",  express.static(path.join(__dirname, 'scripts')));
 
@@ -15,6 +17,22 @@ app.get('/', function(req, res){
 });
 
 server.listen(8080);
+
+
+var browser = new ChromecastAPI.Browser()
+var chromecastConnection = false;
+
+// browser.on('deviceOn', function (device) {
+
+//     if (device.config.name = 'Living Room TV')
+//     {
+//         console.log('Connecting to ' + device.config.name)
+//         chromecastConnection = device;
+//     }
+
+// })
+
+
 
 var colorOptions = ['#3399FF', '#6699FF', '#009933', '#66FF33', '#99FFFF', '#99FF00', '#CC99FF', '#FF99FF', '#FF9900', '#FFCC33']
 
@@ -133,10 +151,6 @@ var handleCommand = function(socket, command, params) {
     switch(command.toLowerCase()) {
         case 'test':
 
-            app.get('/', function(req, res){
-              res.sendFile(__dirname + '/testPage.html');
-            });
-
             break;
         case 'help':
             var helpMsg = "Usable commands:<br /> help - Shows all usable commands<br />list - Shows all connected users<br />whisper,w &lt;username&gt; &lt;message&gt; - Sends a message only specified user can see.<br />color &lt;6 digit hexadecimal value &gt; - Sets your chat color to entered hex value.<br />"
@@ -179,6 +193,80 @@ var handleCommand = function(socket, command, params) {
             }
 
             break;
+
+            // Chromecast Commands start
+        case 'connect':
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            var connectResult = connectToChromecast(params)
+            if (connectResult)
+            {
+                sendChat(socket, "Now connected to " + chromecastConnection.config.name, "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            } else {
+                sendChat(socket, "Could not find a Chrome cast with the name '" + params + "'", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            break;
+        case 'play':
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            chromecastConnection.play(params)
+
+            sendChat(socket, chromecastConnection.config.name + " now playing", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            break;
+        case 'stop':
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            chromecastConnection.stop(params)
+
+            sendChat(socket, chromecastConnection.config.name + " stopped", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            break;
+        case 'pause':
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            chromecastConnection.pause(params)
+            sendChat(socket, chromecastConnection.config.name + " paused", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            break;
+        case 'unpause':
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+            sendChat(socket, chromecastConnection.config.name + " unpaused", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+
+            chromecastConnection.unpause(params)
+            break;
+
+        case 'volume':
+            if (parseFloat(params) < 0 || parseFloat(params) > 1) {
+                sendChat(socket, 'must be between 0 and 1', "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+                return;
+            }
+
+            if (!chromecastConnection){
+                sendChat(socket, "No Chromecast connected. Use the '/connect <chromecast name>' command to connect to one.", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+            }
+
+            console.log("test")
+            chromecastConnection.setVolume(parseFloat(params), function (err, newVol) {
+                if (err) {
+                    sendChat(socket, 'There was an error changing the volume.', "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+                } else {
+                    sendChat(socket, "Volume for " + chromecastConnection.config.name + " set to " + params + "%", "admin", "#000000", false, {showName: false, isSelf: false, whisper: true})
+                }
+            })
+
+
+
+            // Chromecast Commands end
+
         default:
             sendChat(socket, "That is not a known command. use /help for a complete list of commands.", "admin", "#000000", false, {showName: false, isSelf: true, whisper: true})
     }
@@ -196,3 +284,19 @@ var checkForHex = function(str){
         return false;
     }
 }
+
+var connectToChromecast = function(chromecastName) {
+    browser.on('deviceOn', function (device) {
+
+        if (device.config.name == chromecastName)
+        {
+            console.log('Connecting to ' + device.config.name)
+            chromecastConnection = device;
+            return true;
+        }
+    })
+    return false;
+}
+
+
+connectToChromecast('Living Room TV')

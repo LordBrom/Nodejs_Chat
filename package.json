@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/LordBrom/Nodejs_Chat#readme",
   "dependencies": {
+    "chromecast-api": "^0.2.5",
     "express": "^4.16.3",
     "path": "^0.12.7",
     "socket.io": "^2.1.1",
